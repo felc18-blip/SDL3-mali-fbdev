@@ -1552,10 +1552,11 @@ if(SDL_MALI)
 
   sdl_glob_sources("${SDL3_SOURCE_DIR}/src/video/mali-fbdev/*.c")
 
-  sdl_compile_definitions(PRIVATE
-    SDL_VIDEO_DRIVER_MALI=1
-    EGL_API_FB=1
-  )
+  sdl_compile_definitions(PUBLIC SDL_VIDEO_DRIVER_MALI=1 EGL_API_FB=1)
+  if(TARGET SDL3-shared)
+    target_compile_definitions(SDL3-shared PUBLIC SDL_VIDEO_DRIVER_MALI=1)
+  endif()
+  set(SDL_VIDEO_DRIVER_MALI 1)
 
   list(APPEND EXTRA_LIBS EGL)
 endif()
