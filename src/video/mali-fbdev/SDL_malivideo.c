@@ -335,7 +335,6 @@ bool MALI_CreateWindow(SDL_VideoDevice *_this,
     window->w = displaydata->native_display.width;
     window->h = displaydata->native_display.height;
 
-    window->flags |= SDL_WINDOW_OPENGL;
 
     /*
      * Carrega EGL se necessário.
@@ -346,28 +345,32 @@ bool MALI_CreateWindow(SDL_VideoDevice *_this,
      *         native_display = EGL_DEFAULT_DISPLAY
      *         platform       = 0               → EGL escolhe automaticamente
      */
-    if (!_this->egl_data) {
-        if (!SDL_EGL_LoadLibrary(_this, NULL, EGL_DEFAULT_DISPLAY, 0)) {
+    /* Só criar EGL surface se a janela for OpenGL.
+     * Se a janela vier sem SDL_WINDOW_OPENGL, o SDL3 vai chamar RecreateWindow
+     * com a flag se o usuário criar renderer opengles2 — aí sim criamos o EGL.
+     */
+    if (window->flags & SDL_WINDOW_OPENGL) {
+        if (!_this->egl_data) {
+            if (!SDL_EGL_LoadLibrary(_this, NULL, EGL_DEFAULT_DISPLAY, 0)) {
+                SDL_free(windowdata);
+                return false;
+            }
+        }
+        _this->egl_data->egl_surfacetype = EGL_WINDOW_BIT;
+
+        windowdata->egl_surface = SDL_EGL_CreateSurface(
+            _this,
+            window,
+            (NativeWindowType)&displaydata->native_display
+        );
+
+        if (windowdata->egl_surface == EGL_NO_SURFACE) {
+            SDL_SetError("mali-fbdev: Can't create EGL window surface");
             SDL_free(windowdata);
             return false;
         }
-    }
-    _this->egl_data->egl_surfacetype = EGL_WINDOW_BIT;
-
-    /*
-     * Cria EGL surface.
-     * Passamos &native_display como NativeWindowType — padrão Mali FBDEV.
-     */
-    windowdata->egl_surface = SDL_EGL_CreateSurface(
-        _this,
-        window,
-        (NativeWindowType)&displaydata->native_display
-    );
-
-    if (windowdata->egl_surface == EGL_NO_SURFACE) {
-        SDL_SetError("mali-fbdev: Can't create EGL window surface");
-        SDL_free(windowdata);
-        return false;
+    } else {
+        windowdata->egl_surface = EGL_NO_SURFACE;
     }
 
     /*
