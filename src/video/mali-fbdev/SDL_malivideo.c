@@ -125,6 +125,8 @@ static SDL_VideoDevice *MALI_CreateDevice(void)
 
     /* EGL / OpenGL ES — GL_LoadLibrary é NULL porque usamos SDL_EGL direto */
     device->GL_LoadLibrary     = MALI_GLES_LoadLibrary;
+    device->GL_GetProcAddress  = SDL_EGL_GetProcAddressInternal;
+    device->GL_UnloadLibrary   = SDL_EGL_UnloadLibrary;
     device->GL_CreateContext   = MALI_GLES_CreateContext;
     device->GL_MakeCurrent     = MALI_GLES_MakeCurrent;
     device->GL_SwapWindow      = MALI_GLES_SwapWindow;
