@@ -1234,6 +1234,21 @@ macro(CheckLibUDev)
   endif()
 endmacro()
 
+macro(CheckMali)
+  if(SDL_MALI)
+    message(STATUS "Checking for Mali FBDEV support")
+
+    set(SDL_VIDEO_DRIVER_MALI 1)
+    set(HAVE_SDL_VIDEO TRUE)
+
+    sdl_glob_sources("${SDL3_SOURCE_DIR}/src/video/mali-fbdev/*.c")
+
+    sdl_compile_definitions(PUBLIC "LINUX" "EGL_API_FB")
+
+    sdl_link_dependency(mali LIBS EGL)
+  endif()
+endmacro()
+
 macro(CheckLibUnwind)
   if(TARGET SDL3_test)
     set(found_libunwind FALSE)

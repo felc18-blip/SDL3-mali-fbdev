@@ -500,6 +500,7 @@ typedef struct VideoBootStrap
 
 // Not all of these are available in a given build. Use #ifdefs, etc.
 extern VideoBootStrap PRIVATE_bootstrap;
+extern VideoBootStrap MALI_bootstrap;
 extern VideoBootStrap COCOA_bootstrap;
 extern VideoBootStrap X11_bootstrap;
 extern VideoBootStrap WINDOWS_bootstrap;

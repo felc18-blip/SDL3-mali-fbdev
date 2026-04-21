@@ -309,6 +309,7 @@ set_option(SDL_RPATH               "Use an rpath when linking SDL" ${SDL_RPATH_D
 set_option(SDL_CLOCK_GETTIME       "Use clock_gettime() instead of gettimeofday()" ${SDL_CLOCK_GETTIME_DEFAULT})
 dep_option(SDL_X11                 "Use X11 video driver" ${UNIX_SYS} "SDL_VIDEO" OFF)
 dep_option(SDL_X11_SHARED          "Dynamically load X11 support" ON "SDL_X11" OFF)
+set_option(SDL_MALI                "Use Mali EGL fbdev video driver" ON)
 set(SDL_X11_OPTIONS Xcursor Xdbe XInput Xfixes Xrandr Xscrnsaver XShape)
 foreach(_SUB ${SDL_X11_OPTIONS})
   string(TOUPPER "SDL_X11_${_SUB}" _OPT)
@@ -1528,24 +1529,44 @@ elseif(UNIX AND NOT APPLE AND NOT RISCOS AND NOT HAIKU)
     CheckSNDIO()
   endif()
 
-  if(SDL_VIDEO)
-    # Need to check for Raspberry PI first and add platform specific compiler flags, otherwise the test for GLES fails!
-    CheckRPI()
-    # Need to check for ROCKCHIP platform and get rid of "Can't window GBM/EGL surfaces on window creation."
-    CheckROCKCHIP()
-    CheckX11()
-    # Need to check for EGL first because KMSDRM and Wayland depend on it.
-    CheckEGL()
-    CheckKMSDRM()
-    CheckGLX()
-    CheckOpenGL()
-    CheckOpenGLES()
-    CheckWayland()
-    CheckOpenVR()
-    CheckVivante()
-    CheckVulkan()
-    CheckQNXScreen()
-  endif()
+if(SDL_VIDEO)
+
+  # Need to check for Raspberry PI first and add platform specific compiler flags, otherwise the test for GLES fails!
+  CheckRPI()
+  CheckROCKCHIP()
+  CheckX11()
+  CheckEGL()
+  CheckKMSDRM()
+  CheckGLX()
+  CheckOpenGL()
+  CheckOpenGLES()
+
+# 🔥 AQUI
+# ==== MALI FBDEV DRIVER ====
+if(SDL_MALI)
+  message(STATUS ">>> MALI FBDEV ENABLED <<<")
+
+  set(SDL_VIDEO_DRIVER_MALI 1)
+  set(SDL_VIDEO_OPENGL_EGL 1)
+  set(HAVE_SDL_VIDEO TRUE)
+
+  sdl_glob_sources("${SDL3_SOURCE_DIR}/src/video/mali-fbdev/*.c")
+
+  sdl_compile_definitions(PRIVATE
+    SDL_VIDEO_DRIVER_MALI=1
+    EGL_API_FB=1
+  )
+
+  list(APPEND EXTRA_LIBS EGL)
+endif()
+
+  CheckWayland()
+  CheckOpenVR()
+  CheckVivante()
+  CheckVulkan()
+  CheckQNXScreen()
+
+endif()
 
   if(UNIX)
     sdl_glob_sources("${SDL3_SOURCE_DIR}/src/core/unix/*.c")
@@ -2323,7 +2344,7 @@ elseif(APPLE)
 
   # Minimum version for $<LINK_LIBRARY:feature,library-list>
   cmake_minimum_required(VERSION 3.24)
-
+  add_compile_definitions(SDL_VIDEO_DRIVER_MALI=1 EGL_API_FB=1)
   # Actually load the frameworks at the end so we don't duplicate include.
   if(SDL_FRAMEWORK_COREVIDEO)
     find_library(COREMEDIA CoreMedia)

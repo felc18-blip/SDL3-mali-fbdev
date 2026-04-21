@@ -99,4 +99,8 @@ typedef unsigned int uintptr_t;
 /* Enable dialog subsystem */
 #define SDL_DIALOG_DUMMY 1
 
+/* ==== MALI FBDEV DRIVER ==== */
+#define SDL_VIDEO_DRIVER_MALI 1
+#define SDL_VIDEO_OPENGL_EGL 1
+
 #endif /* SDL_build_config_minimal_h_ */
