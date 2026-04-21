@@ -346,6 +346,7 @@ bool MALI_CreateWindow(SDL_VideoDevice *_this,
             return false;
         }
     }
+    _this->egl_data->egl_surfacetype = EGL_WINDOW_BIT;
 
     /*
      * Cria EGL surface.
