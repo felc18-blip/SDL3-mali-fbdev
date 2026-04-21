@@ -325,6 +325,10 @@ bool MALI_CreateWindow(SDL_VideoDevice *_this,
         return false;
     }
 
+    /* SDL3: window->internal é o novo driverdata; a macro SDL_EGL_CreateContext_impl 
+     * acessa window->internal->egl_surface, então precisa ser setado. */
+    window->internal = windowdata;
+
     /* Janela ocupa a tela inteira — fbdev não tem gerenciador de janelas */
     window->w = displaydata->native_display.width;
     window->h = displaydata->native_display.height;
