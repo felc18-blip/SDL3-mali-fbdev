@@ -39,8 +39,8 @@ misrepresented as being the original software.
 /* Tipo nativo de janela Mali FBDEV */
 typedef struct
 {
-    int width;
-    int height;
+    unsigned short width;
+    unsigned short height;
 } Mali_NativeWindowType;
 
 /* Dados internos associados a cada SDL_VideoDisplay */
