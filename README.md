@@ -16,6 +16,7 @@ Destaques
 - Compatibilidade com dispositivos S905 / S905X com 1GB de RAM
 - Execução de ports via PortMaster utilizando SDL3
 - Alto nível de compatibilidade em testes práticos
+- Em testes internos, apresentou desempenho superior ao SDL2 nativo em alguns cenários
 
 Testes
 
@@ -39,6 +40,7 @@ Observações
 
 - Esta não é uma implementação oficial do SDL
 - Desenvolvida especificamente para hardware legado (Mali-450 + kernel 3.14)
+- Resultados podem variar dependendo do dispositivo e build
 - Pode exigir ajustes adicionais dependendo da ROM ou build utilizada
 
 Status
