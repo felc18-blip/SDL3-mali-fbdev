@@ -247,12 +247,36 @@ void MALI_VideoQuit(SDL_VideoDevice *_this)
 
 /*
  * SDL2: void — chamava SDL_AddDisplayMode()
- * SDL3: bool — SDL_AddDisplayMode() foi removido; retornamos true e o SDL
- *              usa desktop_mode automaticamente como modo disponível.
+ * SDL3: bool — registra explicitamente um fullscreen mode correspondente ao
+ *              framebuffer nativo. Sem isso, apps que chamam
+ *              SDL_GetFullscreenDisplayModes() recebem lista vazia e falham
+ *              com "Cannot find desired video mode" (bug visto em re3/reVC).
  */
 bool MALI_GetDisplayModes(SDL_VideoDevice *_this, SDL_VideoDisplay *display)
 {
-    (void)_this; (void)display;
+    SDL_DisplayData *data;
+    SDL_DisplayMode  mode;
+
+    (void)_this;
+
+    data = (SDL_DisplayData *)SDL_GetPointerProperty(
+        SDL_GetDisplayProperties(display->id),
+        MALI_PROP_DISPLAYDATA,
+        NULL
+    );
+    if (!data) {
+        return true;  /* sem dados ainda; SDL usa desktop_mode */
+    }
+
+    SDL_zero(mode);
+    mode.w            = data->native_display.width;
+    mode.h            = data->native_display.height;
+    mode.refresh_rate = 60.0f;
+    mode.format       = SDL_PIXELFORMAT_RGBX8888;
+
+    if (!SDL_AddFullscreenDisplayMode(display, &mode)) {
+        return false;
+    }
     return true;
 }
 
