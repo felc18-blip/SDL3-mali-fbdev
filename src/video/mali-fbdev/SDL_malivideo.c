@@ -355,9 +355,12 @@ bool MALI_CreateWindow(SDL_VideoDevice *_this,
      * acessa window->internal->egl_surface, então precisa ser setado. */
     window->internal = windowdata;
 
-    /* Janela ocupa a tela inteira — fbdev não tem gerenciador de janelas */
+    /* Janela ocupa a tela inteira — fbdev não tem gerenciador de janelas.
+     * Sinalizar fullscreen+borderless deixa o app ciente de que não há
+     * espaço pra decoração/resize e que a janela é o display inteiro. */
     window->w = displaydata->native_display.width;
     window->h = displaydata->native_display.height;
+    window->flags |= SDL_WINDOW_FULLSCREEN | SDL_WINDOW_BORDERLESS;
 
 
     /*
