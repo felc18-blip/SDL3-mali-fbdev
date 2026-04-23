@@ -283,13 +283,38 @@ bool MALI_GetDisplayModes(SDL_VideoDevice *_this, SDL_VideoDisplay *display)
 /*
  * SDL2: int (0 / -1)
  * SDL3: bool (true / false)
+ *
+ * fbdev não suporta troca de modo em runtime pela libMali; aceitar o modo
+ * nativo em silêncio e logar um warning nos demais casos ajuda apps legacy
+ * a não abortarem quando pedem uma resolução não suportada.
  */
 bool MALI_SetDisplayMode(SDL_VideoDevice *_this,
                          SDL_VideoDisplay *display,
                          SDL_DisplayMode  *mode)
 {
-    (void)_this; (void)display; (void)mode;
-    return true;   /* fbdev não suporta troca de modo em runtime */
+    SDL_DisplayData *data;
+
+    (void)_this;
+
+    data = (SDL_DisplayData *)SDL_GetPointerProperty(
+        SDL_GetDisplayProperties(display->id),
+        MALI_PROP_DISPLAYDATA,
+        NULL
+    );
+    if (!data || !mode) {
+        return true;
+    }
+
+    if (mode->w != data->native_display.width ||
+        mode->h != data->native_display.height) {
+        SDL_LogWarn(SDL_LOG_CATEGORY_VIDEO,
+                    "mali-fbdev: requested mode %dx%d differs from native %dx%d; "
+                    "using native (fbdev has no runtime mode switching)",
+                    mode->w, mode->h,
+                    data->native_display.width,
+                    data->native_display.height);
+    }
+    return true;
 }
 
 /* =========================================================================
